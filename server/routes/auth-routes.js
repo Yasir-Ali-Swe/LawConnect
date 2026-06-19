@@ -15,17 +15,31 @@ const router = express.Router();
 
 // Rate limiting for authentication endpoints
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
-  message: "Too many authentication attempts, please try again later.",
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many authentication attempts, please try again later.",
+    });
+  },
 });
 
 const verifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // Slightly higher for verification
-  message: "Too many verification attempts, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many verification attempts, please try again later.",
+    });
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
