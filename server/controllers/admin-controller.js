@@ -421,9 +421,11 @@ export const adminCreateInternalUser = async (req, res) => {
 export const adminGetAllInternalUsers = async (req, res) => {
   try {
     const { role, search, location } = req.query;
-
+    const userId = req.userId;
     // Build query
-    const query = {};
+    const query = {
+      _id: { $ne: userId }, // Exclude self
+    };
     if (role && role !== "all") {
       query.role = role;
     }
