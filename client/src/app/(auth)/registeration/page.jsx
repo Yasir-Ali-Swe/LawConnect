@@ -94,7 +94,7 @@ const RegisterationPage = () => {
       >
         Go Back
       </Link>
-      <div className="hidden bg-foreground xl:flex xl:flex-col xl:justify-center">
+      <div className="hidden bg-foreground xl:px-10 xl:flex xl:flex-col xl:justify-center">
         <div>
           <h1 className="text-3xl font-bold text-background flex items-center gap-3">
             <Scale size={40} /> LawConnect
