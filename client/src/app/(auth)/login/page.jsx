@@ -92,7 +92,7 @@ const LoginPage = () => {
     <div className="grid grid-cols-1 xl:grid-cols-2 min-h-screen w-screen ">
       <Link
         href="/"
-        className="text-background hover:underline absolute top-5 left-10 xl:top-25 xl:left-10"
+        className="text-background hover:underline absolute top-5 left-10 xl:top-15 xl:left-10"
       >
         Go Back
       </Link>
