@@ -18,13 +18,16 @@ const layout = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
   console.log("user in the auth layout:", user);
   const router = useRouter();
+  // useEffect(() => {
+  //   if (user) {
+  //     router.replace(`/dashboard/${roleRoutes[user.role]}`);
+  //   } else {
+  //     router.replace("/login");
+  //   }
+  // }, [user, router]);
   useEffect(() => {
-    if (user) {
-      router.replace(`/dashboard/${roleRoutes[user.role]}`);
-    } else {
-      router.replace("/login");
-    }
-  }, [user, router]);
+    console.log(user);
+  }, [user]);
   return (
     <main className="min-h-screen w-full flex justify-center items-center px-5 lg:px-0">
       {children}
