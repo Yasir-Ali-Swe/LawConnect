@@ -16,6 +16,7 @@ const roleRoutes = {
 const layout = ({ children }) => {
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
+  console.log("user in the auth layout:", user);
   const router = useRouter();
   useEffect(() => {
     if (user) {
