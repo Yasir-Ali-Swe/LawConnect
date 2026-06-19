@@ -183,7 +183,7 @@ const LoginPage = () => {
             Connecting lawyers, clients, and the judiciary seamlessly.
           </p>
         </div>
-        <Card className={"w-full max-w-sm"}>
+        <Card className={"w-full max-w-sm py-4"}>
           <CardHeader>
             <CardTitle>Login</CardTitle>
             <CardDescription>
