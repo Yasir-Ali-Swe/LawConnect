@@ -106,4 +106,8 @@ app.use("/api/court-officer", courtOfficerRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/notifications", notificationRoutes);
 
+app.get("/test", (req, res) => {
+  res.send("API Running");
+});
+
 app.use(errorMiddleware);
