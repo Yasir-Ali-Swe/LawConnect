@@ -82,14 +82,14 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 min-h-screen w-screen ">
+    <div className="grid grid-cols-1 xl:grid-cols-2 min-h-screen w-screen">
       <Link
-        href="/"
+        href="/home"
         className="text-background hover:underline hidden xl:absolute top-5 left-10 xl:top-15 xl:left-10"
       >
         Go Back
       </Link>
-      <div className="hidden bg-foreground px-10 py-10 xl:pt-0 xl:flex xl:flex-col xl:justify-center">
+      <div className="hidden bg-foreground xl:flex xl:flex-col xl:justify-center">
         <div>
           <h1 className="text-3xl font-bold text-background flex items-center gap-3">
             <Scale size={40} /> LawConnect

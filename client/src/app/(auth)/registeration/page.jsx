@@ -87,14 +87,14 @@ const RegisterationPage = () => {
     registerMutation.mutate(values);
   }
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 min-h-screen w-screen ">
+    <div className="grid grid-cols-1 xl:grid-cols-2 min-h-screen w-screen">
       <Link
-        href="/"
-        className="text-background hover:underline absolute top-5 left-10 xl:top-15 xl:left-10"
+        href="/home"
+        className="text-background hover:underline hidden xl:absolute top-5 left-10 xl:top-15 xl:left-10"
       >
         Go Back
       </Link>
-      <div className="bg-foreground px-10 py-10 xl:pt-0 xl:flex xl:flex-col xl:justify-center">
+      <div className="hidden bg-foreground xl:flex xl:flex-col xl:justify-center">
         <div>
           <h1 className="text-3xl font-bold text-background flex items-center gap-3">
             <Scale size={40} /> LawConnect
@@ -178,7 +178,16 @@ const RegisterationPage = () => {
           </ul>
         </div>
       </div>
-      <div className="flex justify-center items-center my-10 xl:my-0">
+      <div className="flex flex-col justify-center items-center px-5 lg:px-0">
+        <div className="flex flex-col items-center justify-center space-y-3 mb-9 xl:hidden">
+          <Link href={"/"} className="flex items-center gap-1 cursor-pointer">
+            <Scale className="size-9" />
+            <p className="text-3xl font-bold">LawConnect</p>
+          </Link>
+          <p className="text-center text-lg text-primary font-medium">
+            Connecting lawyers, clients, and the judiciary seamlessly.
+          </p>
+        </div>
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle>Register</CardTitle>
