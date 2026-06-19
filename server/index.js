@@ -92,9 +92,9 @@ io.on("connection", (socket) => {
   });
 });
 
+await connectDB();
 httpServer.listen(PORT || 5000, async () => {
   console.log(`Server is running on port ${PORT}`);
-  await connectDB();
 });
 
 app.use("/api/auth", authRoutes);
