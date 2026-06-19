@@ -180,7 +180,7 @@ const LoginPage = () => {
           </ul>
         </div>
       </div>
-      <div className="flex justify-center items-center my-10 xl:my-0">
+      <div className="flex justify-center items-center my-10 xl:my-0 px-5 lg:px-0">
         <Card className={"w-full max-w-sm"}>
           <CardHeader>
             <CardTitle>Login</CardTitle>

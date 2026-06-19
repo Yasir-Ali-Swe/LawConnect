@@ -29,7 +29,7 @@ const layout = ({ children }) => {
     console.log(user);
   }, [user]);
   return (
-    <main className="min-h-screen w-full flex justify-center items-center px-5 lg:px-0">
+    <main className="min-h-screen w-full flex justify-center items-center ">
       {children}
     </main>
   );
