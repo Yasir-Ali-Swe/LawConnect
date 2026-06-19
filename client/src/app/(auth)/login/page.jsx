@@ -174,11 +174,8 @@ const LoginPage = () => {
         </div>
       </div>
       <div className="flex flex-col justify-center items-center px-5 lg:px-0">
-        <div className="flex flex-col items-center justify-center space-y-3 mb-9">
-          <Link
-            href={"/"}
-            className="flex items-center gap-1 cursor-pointer xl:hidden"
-          >
+        <div className="flex flex-col items-center justify-center space-y-3 mb-9 xl:hidden">
+          <Link href={"/"} className="flex items-center gap-1 cursor-pointer">
             <Scale className="size-9" />
             <p className="text-3xl font-bold">LawConnect</p>
           </Link>
