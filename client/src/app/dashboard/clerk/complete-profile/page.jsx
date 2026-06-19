@@ -5,16 +5,23 @@ import { clerkApi } from "@/lib/api/clerk";
 import { ClerkProfileForm } from "@/components/dashboard/clerk/ClerkProfileForm";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "@/store/slices/auth-slice";
+import { getDashboardPathForRole } from "@/lib/auth-redirects";
 
 export default function CompleteClerkProfilePage() {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
 
   const mutation = useMutation({
-    mutationFn: clerkApi.updateProfile, // Reusing update as "upsert" logic is in backend
+    mutationFn: clerkApi.updateProfile,
     onSuccess: () => {
       toast.success("Profile completed! Welcome.");
-      // Force refresh or redirect
-      window.location.href = "/dashboard/clerk";
+      if (user) {
+        dispatch(setUser({ ...user, isProfileComplete: true }));
+      }
+      router.replace(getDashboardPathForRole("clerk"));
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || "Failed to complete profile");

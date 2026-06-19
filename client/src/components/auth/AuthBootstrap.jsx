@@ -9,22 +9,34 @@ export default function AuthBootstrap({ children }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    let cancelled = false;
+
     const checkAuth = async () => {
       try {
         const data = await authApi.getMe();
+        if (cancelled) return;
+
         if (data.success) {
           dispatch(setUser(data.user));
         } else {
           dispatch(clearUser());
         }
       } catch (error) {
-        // Silent fail for network/auth errors, user just isn't logged in
-        // Only set loading to false, don't clear user (might be temporary network error)
-        dispatch(setAuthLoading(false));
+        if (cancelled) return;
+
+        if (error.response?.status === 401) {
+          dispatch(clearUser());
+        } else {
+          dispatch(setAuthLoading(false));
+        }
       }
     };
 
     checkAuth();
+
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch]);
 
   return <>{children}</>;

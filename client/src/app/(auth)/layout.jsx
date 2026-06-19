@@ -1,33 +1,39 @@
 "use client";
-import React from "react";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
+import { getPostLoginPath } from "@/lib/auth-redirects";
 
+function AuthLoadingScreen() {
+  return (
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    </div>
+  );
+}
 
-const roleRoutes = {
-  client: "client",
-  lawyer: "lawyer",
-  admin: "admin",
-  clerk: "clerk",
-  court_officer: "court-officer",
-};
-
-const layout = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
-  console.log("user in the auth layout:", user);
+export default function AuthLayout({ children }) {
+  const { user, isAuthLoading, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
   const router = useRouter();
+
   useEffect(() => {
-    if (!user) {
-      router.replace("/login");
+    if (isAuthLoading || !isAuthenticated || !user) {
+      return;
     }
-  }, [user, router]);
+
+    router.replace(getPostLoginPath(user));
+  }, [user, isAuthLoading, isAuthenticated, router]);
+
+  if (isAuthLoading) {
+    return <AuthLoadingScreen />;
+  }
 
   return (
-    <main className="min-h-screen w-full flex justify-center items-center ">
+    <main className="flex min-h-screen w-full items-center justify-center">
       {children}
     </main>
   );
-};
-
-export default layout;
+}

@@ -3,13 +3,24 @@ import { ClientProfileForm } from "@/components/dashboard/client/ClientProfileFo
 import { useMutation } from "@tanstack/react-query";
 import { clientApi } from "@/lib/api/client";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "@/store/slices/auth-slice";
+import { useRouter } from "next/navigation";
+import { getDashboardPathForRole } from "@/lib/auth-redirects";
 
 export default function CompleteClientProfilePage() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const user = useSelector((state) => state.auth.user);
+
   const mutation = useMutation({
     mutationFn: clientApi.createProfile,
     onSuccess: async () => {
       toast.success("Profile completed successfully!");
-      window.location.href = "/dashboard/client";
+      if (user) {
+        dispatch(setUser({ ...user, isProfileComplete: true }));
+      }
+      router.replace(getDashboardPathForRole("client"));
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || "Failed to save profile");

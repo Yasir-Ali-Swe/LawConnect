@@ -16,15 +16,17 @@ import {
 import { LawyerProfileForm } from "@/components/dashboard/lawyer/LawyerProfileForm";
 import { LawyerEducationForm } from "@/components/dashboard/lawyer/LawyerEducationForm";
 import { LawyerProfessionalForm } from "@/components/dashboard/lawyer/LawyerProfessionalForm";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/store/slices/auth-slice";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getDashboardPathForRole } from "@/lib/auth-redirects";
 
 export default function CompleteProfilePage() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const router = useRouter();
+  const reduxUser = useSelector((state) => state.auth.user);
   const [activeTab, setActiveTab] = useState("personal");
 
   // --- QUERY 1: AUTH USER ---
@@ -54,7 +56,7 @@ export default function CompleteProfilePage() {
   const isInfoNotFound = infoError?.response?.status === 404;
   const isEditingInfo = !isInfoNotFound && !!infoResult;
 
-  const user = authData?.data?.user;
+  const user = authData?.user || reduxUser;
   const lawyerInfo = infoResult?.data;
   const lawyerProfile = profileResult?.data;
 
@@ -89,7 +91,7 @@ export default function CompleteProfilePage() {
         dispatch(setUser({ ...user, isProfileComplete: true }));
         toast.success("Profile completed! Redirecting to dashboard...");
         setTimeout(() => {
-          router.push("/dashboard/lawyer");
+          router.replace(getDashboardPathForRole(user.role));
         }, 1500);
       } else {
         toast.success("Details saved successfully");
@@ -102,6 +104,12 @@ export default function CompleteProfilePage() {
     },
   });
 
+  useEffect(() => {
+    if (user?.isProfileComplete) {
+      router.replace(getDashboardPathForRole(user.role));
+    }
+  }, [user, router]);
+
   if (isAuthLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -110,9 +118,7 @@ export default function CompleteProfilePage() {
     );
   }
 
-  // If user is already complete, redirect (safeguard)
   if (user?.isProfileComplete) {
-    router.push("/dashboard/lawyer");
     return null;
   }
 

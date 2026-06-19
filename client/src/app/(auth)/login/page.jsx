@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { authApi } from "@/lib/api";
 import { setUser } from "@/store/slices/auth-slice";
+import { getPostLoginPath } from "@/lib/auth-redirects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -65,17 +66,9 @@ const LoginPage = () => {
     onSuccess: (data) => {
       toast.success("Login successful");
       authApi.getMe().then((meData) => {
-        console.log("User data after login:", meData);
         if (meData.success) {
-          const normalizedRole = meData.user.role.replace("_", "-");
           dispatch(setUser(meData.user));
-          if (!meData.user.isProfileComplete) {
-            router.push(`/dashboard/${normalizedRole}/complete-profile`);
-          } else if (meData.user.role === "client") {
-            router.push("/lawyers-listing");
-          } else {
-            router.push(`/dashboard/${normalizedRole}`);
-          }
+          router.replace(getPostLoginPath(meData.user));
         }
       });
     },

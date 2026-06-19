@@ -3,26 +3,21 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-
-const roleRoutes = {
-  client: "client",
-  lawyer: "lawyer",
-  admin: "admin",
-  clerk: "clerk",
-  court_officer: "court-officer",
-};
+import { getDashboardPathForRole } from "@/lib/auth-redirects";
 
 export default function ClientLayout({ children }) {
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthLoading } = useSelector((state) => state.auth);
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) return;
+    if (isAuthLoading || !user) {
+      return;
+    }
 
     if (user.role !== "client") {
-      router.replace(`/dashboard/${roleRoutes[user.role]}`);
+      router.replace(getDashboardPathForRole(user.role));
     }
-  }, [user, router]);
+  }, [user, isAuthLoading, router]);
 
   return children;
 }

@@ -16,15 +16,17 @@ import {
 import { OfficerProfileForm } from "@/components/dashboard/court-officer/OfficerProfileForm";
 import { OfficerEducationForm } from "@/components/dashboard/court-officer/OfficerEducationForm";
 import { OfficerProfessionalForm } from "@/components/dashboard/court-officer/OfficerProfessionalForm";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/store/slices/auth-slice";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getDashboardPathForRole } from "@/lib/auth-redirects";
 
 export default function CompleteOfficerProfilePage() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const router = useRouter();
+  const reduxUser = useSelector((state) => state.auth.user);
   const [activeTab, setActiveTab] = useState("personal");
 
   // --- QUERY 1: AUTH USER ---
@@ -39,7 +41,7 @@ export default function CompleteOfficerProfilePage() {
     queryFn: courtOfficerApi.getProfile,
   });
 
-  const user = authData?.data?.user;
+  const user = authData?.user || reduxUser;
   const profileData = profileResult?.data;
   const userInfo = profileData?.info;
   const officerDetails = profileData?.officerDetails;
@@ -64,7 +66,7 @@ export default function CompleteOfficerProfilePage() {
           dispatch(setUser({ ...user, isProfileComplete: true }));
         }
         setTimeout(() => {
-          window.location.href = "/dashboard/court-officer";
+          router.replace(getDashboardPathForRole(user.role));
         }, 1500);
       }
     },
@@ -72,6 +74,12 @@ export default function CompleteOfficerProfilePage() {
       toast.error(err.response?.data?.message || "Failed to update profile");
     },
   });
+
+  useEffect(() => {
+    if (user?.isProfileComplete) {
+      router.replace(getDashboardPathForRole(user.role));
+    }
+  }, [user, router]);
 
   if (isAuthLoading || isProfileLoading) {
     return (
@@ -81,9 +89,7 @@ export default function CompleteOfficerProfilePage() {
     );
   }
 
-  // If user is already complete, redirect
   if (user?.isProfileComplete) {
-    router.push("/dashboard/court-officer");
     return null;
   }
 

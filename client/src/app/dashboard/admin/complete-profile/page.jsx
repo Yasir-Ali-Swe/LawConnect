@@ -5,16 +5,23 @@ import { useMutation } from "@tanstack/react-query";
 import { adminApi } from "@/lib/api/admin";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "@/store/slices/auth-slice";
+import { getDashboardPathForRole } from "@/lib/auth-redirects";
 
 export default function CompleteAdminProfilePage() {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
 
   const mutation = useMutation({
     mutationFn: adminApi.createProfile,
     onSuccess: async () => {
       toast.success("Profile completed successfully!");
-      // Refresh auth state to update isProfileComplete -> true
-      window.location.href = "/dashboard/admin";
+      if (user) {
+        dispatch(setUser({ ...user, isProfileComplete: true }));
+      }
+      router.replace(getDashboardPathForRole("admin"));
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || "Failed to save profile");
