@@ -18,8 +18,9 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-
 const app = express();
+app.set("trust proxy", 1);
+
 const httpServer = createServer(app);
 
 // Restrict CORS to the known frontend origin — never use `true` with credentials
