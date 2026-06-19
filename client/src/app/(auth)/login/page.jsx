@@ -65,6 +65,7 @@ const LoginPage = () => {
     onSuccess: (data) => {
       toast.success("Login successful");
       authApi.getMe().then((meData) => {
+        console.log("User data after login:", meData);
         if (meData.success) {
           const normalizedRole = meData.user.role.replace("_", "-");
           dispatch(setUser(meData.user));
