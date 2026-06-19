@@ -4,7 +4,9 @@ import React from "react";
 import { Scale } from "lucide-react";
 import { MobileNavbar } from "@/components/mobile-navbar";
 import { useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
 const Navbar = () => {
+  const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
   const roleRoutes = {
     client: "client",
@@ -13,7 +15,7 @@ const Navbar = () => {
     lawyer: "lawyer",
     court_officer: "court-officer",
   };
-
+  console.log(pathname);
   const dashboardRoute = user ? roleRoutes[user.role] : null;
   return (
     <nav className="bg-foreground text-background ">
@@ -26,11 +28,17 @@ const Navbar = () => {
         </div>
         <div className="links">
           <ul className="hidden lg:flex items-center gap-15">
-            <Link href={"/home"} className="text-lg font-medium">
-              <li>Home</li>
+            <Link
+              href={"/home"}
+              className={`text-lg font-medium ${pathname === "/home" && "underline decoration-3 underline-offset-4"}`}
+            >
+              Home
             </Link>
-            <Link href={"/lawyers-listing"} className="text-lg font-medium">
-              <li>Lawyers</li>
+            <Link
+              href={"/lawyers-listing"}
+              className={`text-lg font-medium ${pathname === "/lawyers-listing" && "underline decoration-3 underline-offset-4"}`}
+            >
+              Lawyers
             </Link>
           </ul>
         </div>
