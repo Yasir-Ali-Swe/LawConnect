@@ -71,13 +71,12 @@ export default function ClientDashboardPage() {
           description="Total requests sent"
         />
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 min-w-0">
+        <Card className="lg:col-span-4 min-w-0">
           <CardHeader>
             <CardTitle>Recent Proposals</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {loadingProposals ? (
               <div className="space-y-2">
                 <Skeleton className="h-10 w-full" />
@@ -92,7 +91,7 @@ export default function ClientDashboardPage() {
                 {proposals.slice(0, 5).map((p) => (
                   <div
                     key={p._id}
-                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0 min-w-0"
                   >
                     <div className="min-w-0 flex-1 mr-2">
                       <p
@@ -109,14 +108,14 @@ export default function ClientDashboardPage() {
                       </p>
                     </div>
                     <div
-                      className={`px-2 py-1 rounded text-xs font-medium capitalize 
-                                    ${
-                                      p.status === "accepted"
-                                        ? "bg-green-100 text-green-700"
-                                        : p.status === "rejected"
-                                          ? "bg-red-100 text-red-700"
-                                          : "bg-yellow-100 text-yellow-700"
-                                    }`}
+                      className={`px-2 py-1 rounded text-xs font-medium capitalize shrink-0
+                              ${
+                                p.status === "accepted"
+                                  ? "bg-green-100 text-green-700"
+                                  : p.status === "rejected"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-yellow-100 text-yellow-700"
+                              }`}
                     >
                       {p.status}
                     </div>
@@ -127,11 +126,11 @@ export default function ClientDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-3 min-w-0">
           <CardHeader>
             <CardTitle>Active Cases</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {loadingCases ? (
               <div className="space-y-2">
                 <Skeleton className="h-10 w-full" />
@@ -144,17 +143,20 @@ export default function ClientDashboardPage() {
                 {cases.slice(0, 5).map((c) => (
                   <div
                     key={c._id}
-                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0 min-w-0"
                   >
-                    <div>
-                      <p className="font-medium text-sm truncate max-w-37.5">
+                    <div className="min-w-0 flex-1 mr-2">
+                      <p
+                        className="font-medium text-sm truncate"
+                        title={c.title}
+                      >
                         {c.title}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {c.caseNumber || "Processing..."}
                       </p>
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground shrink-0">
                       {c.status}
                     </div>
                   </div>
