@@ -37,7 +37,7 @@ export default function LawyerDashboardPage() {
   return (
     <div className="space-y-6 py-6 max-w-7xl mx-auto w-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">
+        <h2 className="text-lg lg:text-3xl font-bold tracking-tight">
           Dashboard Overview
         </h2>
         <Button asChild>
@@ -94,12 +94,12 @@ export default function LawyerDashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 min-w-0">
+        <Card className="lg:col-span-4 min-w-0">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {recentActivity && recentActivity.length > 0 ? (
               <div className="space-y-4">
                 {recentActivity.map((item) => (
@@ -131,11 +131,11 @@ export default function LawyerDashboardPage() {
         </Card>
 
         {/* Placeholder for future widgets or messages */}
-        <Card className="col-span-3">
+        <Card className="lg:col-span-3 min-w-0">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 min-w-0">
             <Button className="w-full justify-start" variant="outline" asChild>
               <Link href="/dashboard/lawyer/messages">Messages</Link>
             </Button>
