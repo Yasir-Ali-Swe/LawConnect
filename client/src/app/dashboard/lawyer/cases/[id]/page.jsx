@@ -127,7 +127,7 @@ export default function LawyerCaseDetailsPage() {
   };
 
   return (
-    <div className="space-y-6 py-6 max-w-6xl mx-auto pb-10">
+    <div className="space-y-3 lg:space-y-6 pt-6 max-w-6xl mx-auto pb-10">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ export default function LawyerCaseDetailsPage() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <h2
-                className="text-3xl font-bold tracking-tight truncate min-w-0"
+                className="text-lg lg:text-3xl font-bold tracking-tight truncate"
                 title={caseData.caseNumber || "Draft Case"}
               >
                 {caseData.caseNumber ? caseData.caseNumber : "Draft Case"}
@@ -148,12 +148,6 @@ export default function LawyerCaseDetailsPage() {
                 {getSubStatusBadge(caseData.submissionStatus)}
               </div>
             </div>
-            <p
-              className="text-muted-foreground text-sm mt-1 truncate"
-              title={caseData._id}
-            >
-              ID: {caseData._id}
-            </p>
           </div>
         </div>
 
@@ -167,12 +161,22 @@ export default function LawyerCaseDetailsPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:w-125 h-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="status">Status</TabsTrigger>
-          <TabsTrigger value="hearings">Hearings</TabsTrigger>
-          <TabsTrigger value="judgment">Judgment</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+        <TabsList className="flex w-full justify-start overflow-x-auto md:overflow-x-visible scrollbar-hide lg:w-125">
+          <TabsTrigger value="overview" className="shrink-0">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="status" className="shrink-0">
+            Status
+          </TabsTrigger>
+          <TabsTrigger value="hearings" className="shrink-0">
+            Hearings
+          </TabsTrigger>
+          <TabsTrigger value="judgment" className="shrink-0">
+            Judgment
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="shrink-0">
+            Documents
+          </TabsTrigger>
         </TabsList>
 
         {/* TAB 1: OVERVIEW */}
