@@ -178,6 +178,61 @@ export default function ClientCaseDetailsPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-full shrink-0">
+                        <FileCheck className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">
+                          Judgment Issued
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Date:{" "}
+                          {format(new Date(activeJudgment.createdAt), "PPP")}
+                        </p>
+                      </div>
+                    </div>
+                    {getVerdictBadge(activeJudgment.verdict)}
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Judgment Details</h4>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
+                      {activeJudgment.judgmentDetails || "No details provided."}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* <TabsContent value="judgment" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Judgment</CardTitle>
+              <CardDescription>
+                Final decision and judgment details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {judgmentLoading ? (
+                <p className="text-sm text-muted-foreground">
+                  Loading judgment...
+                </p>
+              ) : !activeJudgment ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                  <Gavel className="h-10 w-10 mb-3 opacity-50" />
+                  <h3 className="text-lg font-medium">Judgment Pending</h3>
+                  <p className="text-sm max-w-sm mt-1">
+                    The court has not yet issued a judgment for this case.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-full">
                       <FileCheck className="h-6 w-6 text-primary" />
@@ -214,7 +269,7 @@ export default function ClientCaseDetailsPage() {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
 
         {/* TAB 5: DOCUMENTS */}
         <TabsContent value="documents" className="mt-6">
