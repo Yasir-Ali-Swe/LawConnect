@@ -97,45 +97,48 @@ export default function ClientCaseDetailsPage() {
   };
 
   return (
-    <div className="space-y-6 pt-6 max-w-6xl mx-auto pb-10">
+    <div className="space-y-3 lg:space-y-6 pt-6 max-w-6xl mx-auto pb-10">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/dashboard/client/cases">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 max-w-full">
+            <div className="flex items-center max-w-full">
               <h2
-                className="text-3xl font-bold tracking-tight truncate"
+                className="text-lg lg:text-3xl font-bold tracking-tight truncate"
                 title={caseData.caseNumber || "New Case"}
               >
                 {caseData.caseNumber || "New Case"}
               </h2>
               {getSubStatusBadge(caseData.submissionStatus)}
             </div>
-            <p
-              className="text-muted-foreground text-sm mt-1 truncate"
-              title={caseData._id}
-            >
-              ID: {caseData._id}
-            </p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:w-125 h-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="status">Status</TabsTrigger>
-          <TabsTrigger value="hearings">Hearings</TabsTrigger>
-          <TabsTrigger value="judgment">Judgment</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+        <TabsList className="flex w-full justify-start overflow-x-auto md:overflow-x-visible scrollbar-hide lg:w-125">
+          <TabsTrigger value="overview" className="shrink-0">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="status" className="shrink-0">
+            Status
+          </TabsTrigger>
+          <TabsTrigger value="hearings" className="shrink-0">
+            Hearings
+          </TabsTrigger>
+          <TabsTrigger value="judgment" className="shrink-0">
+            Judgment
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="shrink-0">
+            Documents
+          </TabsTrigger>
         </TabsList>
-
         {/* TAB 1: OVERVIEW */}
         <TabsContent value="overview" className="mt-6 space-y-4">
           <CaseOverviewTab caseData={caseData} role="client" />
