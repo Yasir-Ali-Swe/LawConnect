@@ -88,21 +88,21 @@ export default function CourtOfficerProfilePage() {
         </p>
       </div>
 
-      <Tabs defaultValue="account" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
-          <TabsTrigger value="account" className="flex items-center gap-2">
+      <Tabs defaultValue="account" className="space-y-4 w-full">
+        <TabsList className="flex w-full justify-start overflow-x-auto md:overflow-x-visible scrollbar-hide lg:w-125">
+          <TabsTrigger value="account" className="flex items-center gap-2 shrink-0">
             <UserCog className="h-4 w-4" />
             Account
           </TabsTrigger>
-          <TabsTrigger value="personal" className="flex items-center gap-2">
+          <TabsTrigger value="personal" className="flex items-center gap-2 shrink-0">
             <User className="h-4 w-4" />
             Personal
           </TabsTrigger>
-          <TabsTrigger value="education" className="flex items-center gap-2">
+          <TabsTrigger value="education" className="flex items-center gap-2 shrink-0">
             <GraduationCap className="h-4 w-4" />
             Education
           </TabsTrigger>
-          <TabsTrigger value="professional" className="flex items-center gap-2">
+          <TabsTrigger value="professional" className="flex items-center gap-2 shrink-0">
             <Briefcase className="h-4 w-4" />
             Professional
           </TabsTrigger>
