@@ -134,7 +134,7 @@ export default function ClientMessagesPage() {
     );
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] sm:h-150 md:h-[calc(100vh-5rem)] border rounded-lg shadow-sm overflow-hidden bg-background mt-6 max-w-7xl mx-auto w-full">
+    <div className="flex h-[calc(100vh-6rem)] sm:h-150 md:h-[calc(100vh-5rem)] border rounded-lg shadow-sm overflow-hidden bg-background my-6 max-w-7xl mx-auto w-full">
       <ConversationList
         conversations={uiConversations}
         selectedId={selectedId}
