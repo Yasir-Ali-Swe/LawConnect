@@ -126,10 +126,10 @@ export default function OfficerCaseDetailPage() {
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex-1 mr-4">
           <h2
-            className="text-3xl font-bold tracking-tight truncate"
+            className="text-lg lg:text-3xl font-bold tracking-tight truncate"
             title={caseData.title}
           >
-            {caseData.title}
+            {caseData.title}  
           </h2>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="outline">{caseData.caseNumber}</Badge>
@@ -145,12 +145,22 @@ export default function OfficerCaseDetailPage() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:w-125 h-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="status">Status</TabsTrigger>
-          <TabsTrigger value="hearings">Hearings</TabsTrigger>
-          <TabsTrigger value="judgment">Judgment</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+        <TabsList className="flex w-full justify-start overflow-x-auto md:overflow-x-visible scrollbar-hide lg:w-125">
+          <TabsTrigger value="overview" className="shrink-0">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="status" className="shrink-0">
+            Status
+          </TabsTrigger>
+          <TabsTrigger value="hearings" className="shrink-0">
+            Hearings
+          </TabsTrigger>
+          <TabsTrigger value="judgment" className="shrink-0">
+            Judgment
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="shrink-0">
+            Documents
+          </TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW TAB */}
