@@ -19,5 +19,5 @@ export default function LawyerLayout({ children }) {
     }
   }, [user, isAuthLoading, router]);
 
-  return children;
+  return <div className="px-3">{children}</div>;
 }
