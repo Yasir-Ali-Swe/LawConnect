@@ -73,9 +73,6 @@ export function CaseOverviewTab({ caseData, role }) {
                 <span className="font-medium wrap-break-word">
                   {caseData.lawyerId.fullName || "Not assigned"}
                 </span>
-                <span className="text-sm text-muted-foreground wrap-break-word">
-                  {caseData.lawyerId.email}
-                </span>
               </div>
             </div>
           </>
