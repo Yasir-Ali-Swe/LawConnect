@@ -73,7 +73,7 @@ export default function ClientDashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Recent Proposals</CardTitle>
           </CardHeader>
@@ -127,7 +127,7 @@ export default function ClientDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3">
+        <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle>Active Cases</CardTitle>
           </CardHeader>
