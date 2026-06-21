@@ -15,6 +15,7 @@ import messagesRoutes from "./routes/message-route.js";
 import notificationRoutes from "./routes/notification-route.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import helmet from "helmet";
+import morgan from "morgan";
 
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -39,6 +40,7 @@ const io = new Server(httpServer, {
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(helmet());
+app.use(morgan("dev"));
 
 app.use(
   cors({
