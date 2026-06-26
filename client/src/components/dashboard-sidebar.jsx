@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "@/store/slices/auth-slice";
 import { authApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Scale } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { messagesApi } from "@/lib/api/messages";
 import { toast } from "sonner";
@@ -82,7 +82,7 @@ const DashboardSidebar = () => {
 
   return (
     <Sidebar className="bg-sidebar text-sidebar-foreground" collapsible="icon">
-      <SidebarHeader>
+      {/* <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="mt-2 hover:bg-transparent hover:text-background">
             <SidebarMenuButton
@@ -95,8 +95,29 @@ const DashboardSidebar = () => {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarHeader>
+      </SidebarHeader> */}
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/home">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Scale className="size-4" />
+                </div>
 
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">
+                    LawConnect
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    Legal Platform
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
@@ -116,18 +137,19 @@ const DashboardSidebar = () => {
                   unreadCount > 0;
 
                 return (
-                  <SidebarMenuItem
-                    key={item.title}
-                    className={`my-2 ${isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "hover:bg-sidebar-accent hover:text-accent-foreground"
-                      }`}
-                  >
+                  // <SidebarMenuItem
+                  //   key={item.title}
+                  //   className={`my-2 ${isActive
+                  //     ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  //     : "hover:bg-sidebar-accent hover:text-accent-foreground"
+                  //     }`}
+                  // >
+                  <SidebarMenuItem key={item.title} className="my-2">
                     {/* <SidebarMenuButton
                       asChild
                       className="rounded-full text-lg [&>svg]:size-5"
                     > */}
-                    <SidebarMenuButton
+                    {/* <SidebarMenuButton
                       asChild
                       className={`
     h-11
@@ -140,12 +162,15 @@ const DashboardSidebar = () => {
                           : "hover:bg-sidebar-accent hover:text-accent-foreground"
                         }
   `}
+                    > */}
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.title}
+                      className="h-11 rounded-full [&>svg]:size-5"
                     >
+
                       {/* <Link
-                        href={item.url}
-                        className="flex items-center gap-2 justify-between w-full"
-                      > */}
-                      <Link
                         href={item.url}
                         className="
     flex
@@ -162,6 +187,19 @@ const DashboardSidebar = () => {
                         {showRedDot && (
                           <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse mr-2" />
                         )}
+                      </Link> */}
+                      <Link
+                        href={item.url}
+                        className="flex w-full items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </div>
+
+                        {showRedDot && (
+                          <span className="group-data-[collapsible=icon]:hidden h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -176,8 +214,9 @@ const DashboardSidebar = () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
+              tooltip="Logout"
               onClick={handleLogout}
-              className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+              className="text-red-500 hover:text-red-600 hover:bg-red-50"
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
