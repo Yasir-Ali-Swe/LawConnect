@@ -18,7 +18,7 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          
+          background: "#000000",
         }}
       >
         <Scale size={24} color="#0f172a" strokeWidth={2.5} />
