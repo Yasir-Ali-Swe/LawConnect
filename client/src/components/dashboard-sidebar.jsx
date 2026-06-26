@@ -82,20 +82,6 @@ const DashboardSidebar = () => {
 
   return (
     <Sidebar className="bg-sidebar text-sidebar-foreground" collapsible="icon">
-      {/* <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem className="mt-2 hover:bg-transparent hover:text-background">
-            <SidebarMenuButton
-              asChild
-              className="text-l`g hover:bg-transparent hover:text-background"
-            >
-              <Link href="/home" className="font-bold text-xl">
-                LawConnect
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader> */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -137,57 +123,16 @@ const DashboardSidebar = () => {
                   unreadCount > 0;
 
                 return (
-                  // <SidebarMenuItem
-                  //   key={item.title}
-                  //   className={`my-2 ${isActive
-                  //     ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  //     : "hover:bg-sidebar-accent hover:text-accent-foreground"
-                  //     }`}
-                  // >
+
                   <SidebarMenuItem key={item.title} className="my-2">
-                    {/* <SidebarMenuButton
-                      asChild
-                      className="rounded-full text-lg [&>svg]:size-5"
-                    > */}
-                    {/* <SidebarMenuButton
-                      asChild
-                      className={`
-    h-11
-    rounded-full
-    [&>svg]:size-5
-    data-[slot=sidebar-menu-button]:justify-start
-    group-data-[collapsible=icon]:justify-center
-    ${isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "hover:bg-sidebar-accent hover:text-accent-foreground"
-                        }
-  `}
-                    > */}
+
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
                       tooltip={item.title}
-                      className="h-11 rounded-full [&>svg]:size-5"
+                      className="h-11"
                     >
 
-                      {/* <Link
-                        href={item.url}
-                        className="
-    flex
-    w-full
-    items-center
-    justify-between
-    group-data-[collapsible=icon]:justify-center
-  "
-                      >
-                        <div className="flex items-center gap-2">
-                          {item.icon && <item.icon />}
-                          <span>{item.title}</span>
-                        </div>
-                        {showRedDot && (
-                          <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse mr-2" />
-                        )}
-                      </Link> */}
                       <Link
                         href={item.url}
                         className="flex w-full items-center justify-between"
