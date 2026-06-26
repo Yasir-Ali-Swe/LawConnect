@@ -87,7 +87,7 @@ const DashboardSidebar = () => {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/home">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary">
                   <Scale className="size-4" />
                 </div>
 
@@ -137,8 +137,8 @@ const DashboardSidebar = () => {
                         href={item.url}
                         className="flex w-full items-center justify-between"
                       >
-                        <div className="flex items-center gap-2">
-                          <item.icon />
+                        <div className="flex items-center justify-center gap-2">
+                          {item.icon}
                           <span>{item.title}</span>
                         </div>
 
@@ -174,3 +174,6 @@ const DashboardSidebar = () => {
 };
 
 export default DashboardSidebar;
+
+
+// rounded-full [&>svg]:size-5
