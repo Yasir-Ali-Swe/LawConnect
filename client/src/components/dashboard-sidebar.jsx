@@ -21,6 +21,7 @@ import {
   SidebarMenuButton,
   SidebarHeader,
   SidebarFooter,
+  SidebarSeparator,
 } from "./ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -82,7 +83,7 @@ const DashboardSidebar = () => {
 
   return (
     <Sidebar className="bg-sidebar text-sidebar-foreground border-sidebar" collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader >
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
@@ -104,6 +105,7 @@ const DashboardSidebar = () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      <SidebarSeparator className="my-2 border-t border-t-sidebar-border" />
       <SidebarContent className={"border-0"}>
         <SidebarGroup>
           <SidebarGroupLabel>
