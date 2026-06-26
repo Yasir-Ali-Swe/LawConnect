@@ -3,7 +3,7 @@ import { SidebarTrigger } from './ui/sidebar'
 const DasboardNavbar = () => {
   return (
     <div>
-      <SidebarTrigger />
+      <SidebarTrigger className="size-9 [&>svg]:size-6"/>
     </div>
   )
 }
