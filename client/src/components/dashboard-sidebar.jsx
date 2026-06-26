@@ -118,19 +118,42 @@ const DashboardSidebar = () => {
                 return (
                   <SidebarMenuItem
                     key={item.title}
-                    className={`rounded-full my-2 ${
-                      isActive
+                    className={`my-2 ${isActive
                         ? "bg-sidebar-primary text-sidebar-primary-foreground"
                         : "hover:bg-sidebar-accent hover:text-accent-foreground"
-                    }`}
+                      }`}
                   >
-                    <SidebarMenuButton
+                    {/* <SidebarMenuButton
                       asChild
                       className="rounded-full text-lg [&>svg]:size-5"
+                    > */}
+                    <SidebarMenuButton
+                      asChild
+                      className={`
+    h-11
+    rounded-full
+    [&>svg]:size-5
+    data-[slot=sidebar-menu-button]:justify-start
+    group-data-[collapsible=icon]:justify-center
+    ${isActive
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                          : "hover:bg-sidebar-accent hover:text-accent-foreground"
+                        }
+  `}
                     >
-                      <Link
+                      {/* <Link
                         href={item.url}
                         className="flex items-center gap-2 justify-between w-full"
+                      > */}
+                      <Link
+                        href={item.url}
+                        className="
+    flex
+    w-full
+    items-center
+    justify-between
+    group-data-[collapsible=icon]:justify-center
+  "
                       >
                         <div className="flex items-center gap-2">
                           {item.icon && <item.icon />}
