@@ -2,7 +2,7 @@ import React from 'react'
 import { SidebarTrigger } from './ui/sidebar'
 const DasboardNavbar = () => {
   return (
-    <div>
+    <div className='bg-sidebar text-sidebar-foreground h-16 w-full'>
       <SidebarTrigger />
     </div>
   )
