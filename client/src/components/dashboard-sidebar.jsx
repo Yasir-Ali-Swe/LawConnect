@@ -81,7 +81,7 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <Sidebar className="bg-sidebar text-sidebar-foreground" collapsible="icon">
+    <Sidebar className="bg-sidebar text-sidebar-foreground border-0" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -104,7 +104,7 @@ const DashboardSidebar = () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className={"border-0"}>
         <SidebarGroup>
           <SidebarGroupLabel>
             {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}{" "}
