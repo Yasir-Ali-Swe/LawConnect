@@ -81,7 +81,7 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <Sidebar className="bg-sidebar text-sidebar-foreground border-0" collapsible="icon">
+    <Sidebar className="bg-sidebar text-sidebar-foreground border-sidebar" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
