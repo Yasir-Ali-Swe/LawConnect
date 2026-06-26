@@ -81,7 +81,7 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <Sidebar className="bg-sidebar text-sidebar-foreground">
+    <Sidebar className="bg-sidebar text-sidebar-foreground" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="mt-2 hover:bg-transparent hover:text-background">
