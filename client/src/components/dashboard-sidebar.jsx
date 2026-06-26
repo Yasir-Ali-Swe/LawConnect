@@ -105,8 +105,8 @@ const DashboardSidebar = () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarSeparator className="my-2 border-t border-t-sidebar-border" />
-      <SidebarContent className={"border-0"}>
+      <SidebarSeparator className="border-t border-t-sidebar-border mx-0 px-0" />
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
             {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}{" "}
