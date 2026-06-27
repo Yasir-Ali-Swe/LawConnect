@@ -15,6 +15,31 @@ const JudgmentSchema = new mongoose.Schema(
         verdict: {
             type: String, // e.g., "Guilty", "Not Guilty", "Dismissed", "Settled"
         },
+        documentUrl: {
+            type: String,
+            default: null,
+        },
+        documentPublicId: {
+            type: String,
+            default: null,
+        },
+        documentOriginalName: {
+            type: String,
+            default: null,
+        },
+        documentMimeType: {
+            type: String,
+            default: null,
+        },
+        documentSize: {
+            type: Number,
+            default: null,
+        },
+        uploadedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
     },
     { timestamps: true }
 );
