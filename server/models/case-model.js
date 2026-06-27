@@ -76,6 +76,7 @@ const CaseSchema = new mongoose.Schema(
       {
         url: { type: String, required: true },
         publicId: { type: String, required: true },
+        title: { type: String, default: null },
         uploadedBy: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
