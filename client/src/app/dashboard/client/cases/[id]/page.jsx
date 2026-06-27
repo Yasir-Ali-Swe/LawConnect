@@ -18,7 +18,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, FileText, Gavel, FileCheck } from "lucide-react";
+import { ArrowLeft, FileText, Gavel, FileCheck, Eye, Download } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
@@ -241,6 +241,59 @@ export default function ClientCaseDetailsPage() {
                       {activeJudgment.judgmentDetails || "No details provided."}
                     </p>
                   </div>
+
+                  {activeJudgment.documentOriginalName && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Decision Document</h4>
+                        <Card>
+                          <CardContent className="p-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0 space-y-1 flex-1">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 shrink-0 text-primary" />
+                                <span
+                                  className="font-medium text-sm truncate max-w-55 sm:max-w-70 md:max-w-80"
+                                  title={activeJudgment.documentOriginalName}
+                                >
+                                  {activeJudgment.documentOriginalName}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground pl-6">
+                                Uploaded {format(new Date(activeJudgment.updatedAt), "PPP")}
+                                {activeJudgment.documentSize && ` · Size: ${(activeJudgment.documentSize / 1024 / 1024).toFixed(2)} MB`}
+                              </p>
+                            </div>
+                            <div className="flex gap-2 shrink-0">
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={activeJudgment.documentUrl} target="_blank" rel="noopener noreferrer">
+                                  <Eye className="mr-1 h-4 w-4" />
+                                  View
+                                </a>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  const a = document.createElement("a");
+                                  a.href = activeJudgment.documentUrl;
+                                  a.download = activeJudgment.documentOriginalName || "decision";
+                                  a.target = "_blank";
+                                  a.rel = "noopener noreferrer";
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  document.body.removeChild(a);
+                                }}
+                              >
+                                <Download className="mr-1 h-4 w-4" />
+                                Download
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </CardContent>
