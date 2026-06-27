@@ -13,6 +13,7 @@ import { createNotification } from "../services/notification-service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import cloudinary from "../config/cloudinary.js";
+import { decrypt } from "../utils/crypto.js";
 
 const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -742,19 +743,26 @@ export const uploadCaseDocument = async (req, res) => {
         }
 
         const user = await userBaseModel.findById(userId);
-        if (!user || user.role !== "client") {
-            return res.status(403).json({ success: false, message: "Only clients can upload documents." });
+        if (!user || (user.role !== "client" && user.role !== "lawyer")) {
+            return res.status(403).json({ success: false, message: "Only clients and lawyers can upload documents." });
         }
 
-        // Verify case exists and belongs to this client
+        // Verify case exists and belongs to this client/lawyer
         const caseData = await caseModel.findById(caseId);
         if (!caseData) {
             return res.status(404).json({ success: false, message: "Case not found." });
         }
 
-        const caseClientId = caseData.clientId?._id?.toString() || caseData.clientId?.toString();
-        if (caseClientId !== userId) {
-            return res.status(403).json({ success: false, message: "You can only upload documents to your own case." });
+        if (user.role === "client") {
+            const caseClientId = caseData.clientId?._id?.toString() || caseData.clientId?.toString();
+            if (caseClientId !== userId) {
+                return res.status(403).json({ success: false, message: "You can only upload documents to your own case." });
+            }
+        } else if (user.role === "lawyer") {
+            const caseLawyerId = caseData.lawyerId?._id?.toString() || caseData.lawyerId?.toString();
+            if (caseLawyerId !== userId) {
+                return res.status(403).json({ success: false, message: "You can only upload documents to your assigned case." });
+            }
         }
 
         // Upload buffer to Cloudinary
@@ -777,6 +785,7 @@ export const uploadCaseDocument = async (req, res) => {
         caseData.documents.push({
             url: uploadResult.secure_url,
             publicId: uploadResult.public_id,
+            title: req.file.originalname, // Store original filename!
             uploadedBy: userId,
         });
 
@@ -801,7 +810,22 @@ export const getCaseJudgments = async (req, res) => {
         if (access === "unauthorized") return res.status(403).json({ success: false, message: "Unauthorized access to case judgments" });
 
         const judgments = await judgmentModel.find({ caseId }).sort({ createdAt: -1 });
-        res.status(200).json({ success: true, data: judgments });
+
+        // Decrypt judgment details for each judgment
+        const decryptedJudgments = judgments.map(j => {
+            const doc = j.toObject();
+            if (doc.judgmentDetails) {
+                try {
+                    doc.judgmentDetails = decrypt(doc.judgmentDetails);
+                } catch (e) {
+                    console.error("Failed to decrypt judgment details:", e);
+                    doc.judgmentDetails = "[Decryption Failed]";
+                }
+            }
+            return doc;
+        });
+
+        res.status(200).json({ success: true, data: decryptedJudgments });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching judgments", error: error.message });
     }
