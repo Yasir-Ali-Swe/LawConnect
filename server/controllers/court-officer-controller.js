@@ -6,6 +6,8 @@ import userInfoModel from "../models/user-info-model.js";
 import userBaseModel from "../models/user-base-model.js";
 import { notifyCaseParties } from "../services/notification-service.js";
 import { replaceProfileImage } from "../utils/profile-image-service.js";
+import { encrypt } from "../utils/crypto.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const courtOfficerGetAllTheCase = async (req, res) => {
     try {
@@ -85,9 +87,10 @@ export const updateCaseStatus = async (req, res) => {
             // Check if judgment already exists to avoid duplicates if accidentally called
             const existingJudgment = await judgmentModel.findOne({ caseId });
             if (!existingJudgment) {
+                const encryptedDetails = encrypt(judgmentDetails);
                 await judgmentModel.create({
                     caseId,
-                    judgmentDetails,
+                    judgmentDetails: encryptedDetails,
                     verdict
                 });
             }
@@ -271,34 +274,97 @@ export const makeJudgment = async (req, res) => {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
 
-        if (caseData.status === "decided" || caseData.status === "closed") {
-            return res.status(400).json({ success: false, message: "Case is already decided or closed" });
+        // Validate document if provided
+        let uploadResult = null;
+        if (req.file) {
+            const allowedMimeTypes = [
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ];
+            if (!allowedMimeTypes.includes(req.file.mimetype)) {
+                return res.status(400).json({ success: false, message: "Invalid file type. Only PDF, DOC, and DOCX are allowed." });
+            }
+            if (req.file.size > 10 * 1024 * 1024) { // 10MB limit
+                return res.status(400).json({ success: false, message: "File is too large. Maximum size is 10MB." });
+            }
+
+            // Upload buffer to Cloudinary
+            uploadResult = await new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: `fyp/cases/${caseId}/judgment`,
+                        resource_type: "auto",
+                        use_filename: true,
+                        unique_filename: true,
+                    },
+                    (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result);
+                    }
+                );
+                stream.end(req.file.buffer);
+            });
         }
+
+        // Encrypt judgment text
+        const encryptedDetails = encrypt(judgmentDetails.trim());
 
         // Check if judgment already exists
-        const existingJudgment = await judgmentModel.findOne({ caseId });
-        if (existingJudgment) {
-            return res.status(400).json({ success: false, message: "Judgment already exists for this case" });
+        let judgment = await judgmentModel.findOne({ caseId });
+        let isNew = false;
+
+        if (judgment) {
+            // Update existing judgment
+            judgment.judgmentDetails = encryptedDetails;
+            judgment.verdict = verdict ? verdict.trim() : judgment.verdict;
+            if (uploadResult) {
+                judgment.documentUrl = uploadResult.secure_url;
+                judgment.documentPublicId = uploadResult.public_id;
+                judgment.documentOriginalName = req.file.originalname;
+                judgment.documentMimeType = req.file.mimetype;
+                judgment.documentSize = req.file.size;
+                judgment.uploadedBy = courtOfficerId;
+            }
+            await judgment.save();
+        } else {
+            // Create new judgment
+            isNew = true;
+            const judgmentData = {
+                caseId,
+                judgmentDetails: encryptedDetails,
+                verdict: verdict ? verdict.trim() : "",
+            };
+
+            if (uploadResult) {
+                judgmentData.documentUrl = uploadResult.secure_url;
+                judgmentData.documentPublicId = uploadResult.public_id;
+                judgmentData.documentOriginalName = req.file.originalname;
+                judgmentData.documentMimeType = req.file.mimetype;
+                judgmentData.documentSize = req.file.size;
+                judgmentData.uploadedBy = courtOfficerId;
+            }
+
+            judgment = await judgmentModel.create(judgmentData);
+
+            // Change case status to decided
+            caseData.status = "decided";
+            await caseData.save();
+
+            // Notify Parties
+            await notifyCaseParties(caseId, courtOfficerId, {
+                type: "judgment",
+                title: "Judgment Released",
+                message: `A judgment has been released for case ${caseData.caseNumber}. Verdict: ${verdict}`,
+                metadata: { verdict }
+            });
         }
 
-        const newJudgment = await judgmentModel.create({
-            caseId,
-            judgmentDetails,
-            verdict
+        return res.status(isNew ? 201 : 200).json({
+            success: true,
+            message: isNew ? "Judgment created and case decided successfully" : "Judgment updated successfully",
+            data: judgment
         });
-
-        caseData.status = "decided";
-        await caseData.save();
-
-        // Notify Parties
-        await notifyCaseParties(caseId, courtOfficerId, {
-            type: "judgment",
-            title: "Judgment Released",
-            message: `A judgment has been released for case ${caseData.caseNumber}. Verdict: ${verdict}`,
-            metadata: { verdict }
-        });
-
-        return res.status(201).json({ success: true, message: "Judgment created and case decided successfully", data: newJudgment });
 
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
