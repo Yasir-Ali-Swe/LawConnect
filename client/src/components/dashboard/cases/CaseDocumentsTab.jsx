@@ -24,9 +24,9 @@ export function CaseDocumentsTab({ documents = [], isLoading, role, caseId, quer
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
 
-    const isClient = role === "client";
+    const canUpload = role === "client" || role === "lawyer";
 
-    // -- Upload Mutation (client only) --
+    // -- Upload Mutation (client/lawyer) --
     const uploadMutation = useMutation({
         mutationFn: (formData) => casesApi.uploadDocument(caseId, formData),
         onSuccess: () => {
@@ -64,7 +64,7 @@ export function CaseDocumentsTab({ documents = [], isLoading, role, caseId, quer
                     <FileText className="h-5 w-5" /> Case Documents
                 </h3>
 
-                {isClient && (
+                {canUpload && (
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Hidden file input */}
                         <input
@@ -117,7 +117,7 @@ export function CaseDocumentsTab({ documents = [], isLoading, role, caseId, quer
                     <FileText className="h-10 w-10 mb-3 opacity-40" />
                     <h3 className="text-lg font-medium">No Documents Yet</h3>
                     <p className="text-sm max-w-sm mt-1">
-                        {isClient
+                        {canUpload
                             ? "Upload your first document using the button above."
                             : "No documents have been uploaded for this case."}
                     </p>
