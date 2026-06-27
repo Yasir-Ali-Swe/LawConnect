@@ -171,7 +171,7 @@ function DocumentCard({ doc }) {
 
                 {/* Right: actions */}
                 <div className="flex gap-2 shrink-0">
-                    <Button
+                    {/* <Button
                         variant="outline"
                         size="sm"
                         asChild
@@ -180,7 +180,7 @@ function DocumentCard({ doc }) {
                             <Eye className="mr-1 h-4 w-4" />
                             View
                         </a>
-                    </Button>
+                    </Button> */}
                     <Button
                         variant="ghost"
                         size="sm"
