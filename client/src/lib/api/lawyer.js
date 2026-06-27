@@ -45,8 +45,14 @@ export const lawyerApi = {
         const response = await api.put("/lawyer/update-lawyer-profile", data);
         return response.data;
     },
-    getPublicLawyers: async () => {
-        const response = await api.get("/lawyer/public/all");
+    getPublicLawyers: async (filters = {}) => {
+        const params = {};
+        if (filters.city) params.city = filters.city;
+        if (filters.name) params.name = filters.name;
+        if (filters.practiceAreas && filters.practiceAreas.length > 0) {
+            params.practiceAreas = filters.practiceAreas.join(",");
+        }
+        const response = await api.get("/lawyer/public/all", { params });
         return response.data;
     }
 };
