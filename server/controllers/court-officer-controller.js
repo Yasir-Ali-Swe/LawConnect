@@ -274,6 +274,15 @@ export const makeJudgment = async (req, res) => {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
 
+        // Check if judgment already exists
+        const existingJudgment = await judgmentModel.findOne({ caseId });
+        if (existingJudgment) {
+            return res.status(409).json({
+                success: false,
+                message: "This court decision has already been finalized and cannot be modified."
+            });
+        }
+
         // Validate document if provided
         let uploadResult = null;
         if (req.file) {
@@ -310,59 +319,39 @@ export const makeJudgment = async (req, res) => {
         // Encrypt judgment text
         const encryptedDetails = encrypt(judgmentDetails.trim());
 
-        // Check if judgment already exists
-        let judgment = await judgmentModel.findOne({ caseId });
-        let isNew = false;
+        // Create new judgment
+        const judgmentData = {
+            caseId,
+            judgmentDetails: encryptedDetails,
+            verdict: verdict ? verdict.trim() : "",
+        };
 
-        if (judgment) {
-            // Update existing judgment
-            judgment.judgmentDetails = encryptedDetails;
-            judgment.verdict = verdict ? verdict.trim() : judgment.verdict;
-            if (uploadResult) {
-                judgment.documentUrl = uploadResult.secure_url;
-                judgment.documentPublicId = uploadResult.public_id;
-                judgment.documentOriginalName = req.file.originalname;
-                judgment.documentMimeType = req.file.mimetype;
-                judgment.documentSize = req.file.size;
-                judgment.uploadedBy = courtOfficerId;
-            }
-            await judgment.save();
-        } else {
-            // Create new judgment
-            isNew = true;
-            const judgmentData = {
-                caseId,
-                judgmentDetails: encryptedDetails,
-                verdict: verdict ? verdict.trim() : "",
-            };
-
-            if (uploadResult) {
-                judgmentData.documentUrl = uploadResult.secure_url;
-                judgmentData.documentPublicId = uploadResult.public_id;
-                judgmentData.documentOriginalName = req.file.originalname;
-                judgmentData.documentMimeType = req.file.mimetype;
-                judgmentData.documentSize = req.file.size;
-                judgmentData.uploadedBy = courtOfficerId;
-            }
-
-            judgment = await judgmentModel.create(judgmentData);
-
-            // Change case status to decided
-            caseData.status = "decided";
-            await caseData.save();
-
-            // Notify Parties
-            await notifyCaseParties(caseId, courtOfficerId, {
-                type: "judgment",
-                title: "Judgment Released",
-                message: `A judgment has been released for case ${caseData.caseNumber}. Verdict: ${verdict}`,
-                metadata: { verdict }
-            });
+        if (uploadResult) {
+            judgmentData.documentUrl = uploadResult.secure_url;
+            judgmentData.documentPublicId = uploadResult.public_id;
+            judgmentData.documentOriginalName = req.file.originalname;
+            judgmentData.documentMimeType = req.file.mimetype;
+            judgmentData.documentSize = req.file.size;
+            judgmentData.uploadedBy = courtOfficerId;
         }
 
-        return res.status(isNew ? 201 : 200).json({
+        const judgment = await judgmentModel.create(judgmentData);
+
+        // Change case status to decided
+        caseData.status = "decided";
+        await caseData.save();
+
+        // Notify Parties
+        await notifyCaseParties(caseId, courtOfficerId, {
+            type: "judgment",
+            title: "Judgment Released",
+            message: `A judgment has been released for case ${caseData.caseNumber}. Verdict: ${verdict}`,
+            metadata: { verdict }
+        });
+
+        return res.status(201).json({
             success: true,
-            message: isNew ? "Judgment created and case decided successfully" : "Judgment updated successfully",
+            message: "Judgment created and case decided successfully",
             data: judgment
         });
 
