@@ -158,7 +158,7 @@ export default function OfficerCaseDetailPage() {
             className="text-lg lg:text-3xl font-bold tracking-tight truncate"
             title={caseData.title}
           >
-            {caseData.title}  
+            {caseData.title}
           </h2>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="outline">{caseData.caseNumber}</Badge>
@@ -216,68 +216,38 @@ export default function OfficerCaseDetailPage() {
         <TabsContent value="judgment" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>{activeJudgment ? "Update Judgment" : "Final Judgment"}</CardTitle>
+              <CardTitle>Final Judgment</CardTitle>
             </CardHeader>
             <CardContent>
               {judgmentLoading ? (
                 <div className="py-4 text-sm text-muted-foreground">Loading judgment details...</div>
-              ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!verdict.trim()) {
-                      toast.warning("Verdict summary is required.");
-                      return;
-                    }
-                    if (!details.trim()) {
-                      toast.warning("Judgment details are required.");
-                      return;
-                    }
-
-                    const isConfirm = confirm(
-                      activeJudgment 
-                        ? "Are you sure you want to update the judgment?" 
-                        : "Are you sure? This will deliver the judgment and close the case."
-                    );
-                    
-                    if (isConfirm) {
-                      const fd = new FormData();
-                      fd.append("verdict", verdict.trim());
-                      fd.append("judgmentDetails", details.trim());
-                      if (selectedFile) {
-                        fd.append("file", selectedFile);
-                      }
-                      judgmentMutation.mutate(fd);
-                    }
-                  }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <Label>Verdict Summary</Label>
-                    <Input
-                      name="verdict"
-                      value={verdict}
-                      onChange={(e) => setVerdict(e.target.value)}
-                      placeholder="e.g. In favor of Plaintiff"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label>Detailed Judgment</Label>
-                    <Textarea
-                      name="details"
-                      value={details}
-                      onChange={(e) => setDetails(e.target.value)}
-                      className="min-h-37.5"
-                      placeholder="Full judgment text..."
-                      required
-                    />
+              ) : activeJudgment ? (
+                <div className="space-y-6">
+                  {/* Warning Banner */}
+                  <div className="bg-yellow-50 dark:bg-yellow-950/20 border-l-4 border-yellow-500 p-4 rounded-r-md mb-6">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
+                        Final Decision Submitted: This decision has been finalized and can no longer be modified.
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Decision Document display (if uploaded previously) */}
-                  {activeJudgment?.documentOriginalName && (
+                  <div className="space-y-4">
+                    <div className="bg-muted/40 p-4 rounded-md border">
+                      <h4 className="font-semibold mb-2">Verdict Summary</h4>
+                      <p className="text-sm">{activeJudgment.verdict || "No verdict summary provided."}</p>
+                    </div>
+                    <div className="bg-muted/40 p-4 rounded-md border">
+                      <h4 className="font-semibold mb-2">Detailed Judgment</h4>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{activeJudgment.judgmentDetails || "No details provided."}</p>
+                    </div>
+                  </div>
+
+                  {/* Decision Document Display */}
+                  {activeJudgment.documentOriginalName && (
                     <div className="mt-4">
-                      <Label>Uploaded Decision Document</Label>
+                      <Label>Decision Document</Label>
                       <Card className="mt-1 bg-muted/40">
                         <CardContent className="p-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0 space-y-1 flex-1">
@@ -315,11 +285,62 @@ export default function OfficerCaseDetailPage() {
                       </Card>
                     </div>
                   )}
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!verdict.trim()) {
+                      toast.warning("Verdict summary is required.");
+                      return;
+                    }
+                    if (!details.trim()) {
+                      toast.warning("Judgment details are required.");
+                      return;
+                    }
+
+                    const isConfirm = confirm(
+                      "Are you sure? This will deliver the judgment and close the case."
+                    );
+                    
+                    if (isConfirm) {
+                      const fd = new FormData();
+                      fd.append("verdict", verdict.trim());
+                      fd.append("judgmentDetails", details.trim());
+                      if (selectedFile) {
+                        fd.append("file", selectedFile);
+                      }
+                      judgmentMutation.mutate(fd);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <Label>Verdict Summary</Label>
+                    <Input
+                      name="verdict"
+                      value={verdict}
+                      onChange={(e) => setVerdict(e.target.value)}
+                      placeholder="e.g. In favor of Plaintiff"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Detailed Judgment</Label>
+                    <Textarea
+                      name="details"
+                      value={details}
+                      onChange={(e) => setDetails(e.target.value)}
+                      className="min-h-37.5"
+                      placeholder="Full judgment text..."
+                      required
+                    />
+                  </div>
 
                   {/* Document Upload Control */}
                   <div className="space-y-2">
                     <Label htmlFor="decision-file">
-                      {activeJudgment?.documentOriginalName ? "Replace Decision Document (PDF, DOC, DOCX)" : "Upload Decision Document (PDF, DOC, DOCX)"}
+                      Upload Decision Document (PDF, DOC, DOCX)
                     </Label>
                     <div className="flex items-center gap-3">
                       <Input
@@ -384,7 +405,7 @@ export default function OfficerCaseDetailPage() {
 
                   <Button
                     type="submit"
-                    variant={activeJudgment ? "default" : "destructive"}
+                    variant="destructive"
                     disabled={judgmentMutation.isPending}
                     className="w-full sm:w-auto"
                   >
@@ -396,7 +417,7 @@ export default function OfficerCaseDetailPage() {
                     ) : (
                       <>
                         <Gavel className="mr-2 h-4 w-4" />
-                        {activeJudgment ? "Update Judgment" : "Deliver Judgment & Close Case"}
+                        Deliver Judgment & Close Case
                       </>
                     )}
                   </Button>
