@@ -263,11 +263,11 @@ export default function OfficerCaseDetailPage() {
                             </p>
                           </div>
                           <div className="flex gap-2 shrink-0">
-                            <Button variant="outline" size="sm" asChild>
+                            {/* <Button variant="outline" size="sm" asChild>
                               <a href={activeJudgment.documentUrl} target="_blank" rel="noopener noreferrer">
                                 <Eye className="mr-1 h-4 w-4" /> View
                               </a>
-                            </Button>
+                            </Button> */}
                             <Button variant="ghost" size="sm" type="button" onClick={() => {
                               const a = document.createElement("a");
                               a.href = activeJudgment.documentUrl;
@@ -302,7 +302,7 @@ export default function OfficerCaseDetailPage() {
                     const isConfirm = confirm(
                       "Are you sure? This will deliver the judgment and close the case."
                     );
-                    
+
                     if (isConfirm) {
                       const fd = new FormData();
                       fd.append("verdict", verdict.trim());
