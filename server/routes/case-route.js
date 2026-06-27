@@ -25,6 +25,7 @@ import { clerkMiddleware } from "../middlewares/clerk-middleware.js";
 import { courtOfficerMiddleware } from "../middlewares/court-officer-middleware.js";
 import { upload } from "../middlewares/upload-middleware.js";
 import { verifyToken } from "../middlewares/auth-middleware.js";
+import { lawyerClientMiddleware } from "../middlewares/lawyer-client-middleware.js";
 import express from "express";
 
 const router = express.Router();
@@ -52,14 +53,14 @@ router.get("/client/cases/:caseId/hearings", clientMiddleware, getCaseHearings);
 router.get("/client/cases/:caseId/documents", clientMiddleware, getCaseDocuments);
 router.get("/client/cases/:caseId/judgments", clientMiddleware, getCaseJudgments);
 router.post("/client/draft", clientMiddleware, clientDraftCase);
-// Client upload document (CLIENT ONLY)
-router.post("/client/cases/:caseId/upload-document", clientMiddleware, upload.single("file"), uploadCaseDocument);
-router.post("/:caseId/upload-document", clientMiddleware, upload.single("file"), uploadCaseDocument);
+// Client/Lawyer upload document
+router.post("/client/cases/:caseId/upload-document", lawyerClientMiddleware, upload.single("file"), uploadCaseDocument);
+router.post("/:caseId/upload-document", lawyerClientMiddleware, upload.single("file"), uploadCaseDocument);
 
 // --- Shared Sub-resource Routes (Lawyer) ---
 router.get("/:caseId/hearings", lawyerMiddleware, getCaseHearings);
 router.get("/:caseId/documents", verifyToken, getCaseDocuments);
-router.get("/:caseId/judgments", lawyerMiddleware, getCaseJudgments);
+router.get("/:caseId/judgments", verifyToken, getCaseJudgments);
 router.get("/cases/:caseId/documents", verifyToken, getCaseDocuments);
 
 // --- Court Officer Sub-resource Routes ---
