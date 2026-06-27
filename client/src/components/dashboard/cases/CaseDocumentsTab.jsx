@@ -84,11 +84,11 @@ export function CaseDocumentsTab({ documents = [], isLoading, role, caseId, quer
                             <FolderOpen className="mr-2 h-4 w-4" />
                             {selectedFile
                                 ? <span
-                                                                        className="max-w-35 truncate"
+                                    className="max-w-35 truncate"
                                     title={selectedFile.name}
-                                  >
+                                >
                                     {selectedFile.name}
-                                  </span>
+                                </span>
                                 : "Choose File"}
                         </Button>
                         <Button
