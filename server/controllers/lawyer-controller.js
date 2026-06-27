@@ -45,23 +45,65 @@ export const createLawyerInfo = async (req, res) => {
   }
 };
 
+const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const getPublicLawyers = async (req, res) => {
   try {
-    // 1. Find all users who are lawyers and have complete profiles
-    const lawyers = await userBaseModel.find({
+    const { city, name, practiceAreas } = req.query;
+
+    // 1. Build userBaseModel query
+    const userQuery = {
       role: "lawyer",
       isProfileComplete: true
-    }).select("-password");
+    };
+
+    if (name) {
+      const trimmedName = name.trim();
+      if (trimmedName) {
+        userQuery.fullName = { $regex: escapeRegex(trimmedName), $options: "i" };
+      }
+    }
+
+    // Find all users who match userQuery
+    const lawyers = await userBaseModel.find(userQuery).select("-password");
 
     if (!lawyers || lawyers.length === 0) {
       return res.status(200).json({ success: true, data: [] });
     }
 
-    // 2. Hydrate with Profile Info (Education, Bio, etc.)
     const lawyerIds = lawyers.map(l => l._id);
 
+    // 2. Build lawyerProfileModel query
+    const profileQuery = { userId: { $in: lawyerIds } };
+
+    if (city) {
+      const trimmedCity = city.trim();
+      if (trimmedCity) {
+        // Find matching UserInfo documents
+        const matchingInfos = await UserInfoModel.find({
+          city: { $regex: escapeRegex(trimmedCity), $options: "i" }
+        }).select("_id");
+
+        const userInfoIds = matchingInfos.map(info => info._id);
+        profileQuery.lawyerProfileId = { $in: userInfoIds };
+      }
+    }
+
+    if (practiceAreas) {
+      let areaList = [];
+      if (Array.isArray(practiceAreas)) {
+        areaList = practiceAreas.map(a => a.trim()).filter(Boolean);
+      } else if (typeof practiceAreas === "string") {
+        areaList = practiceAreas.split(",").map(a => a.trim()).filter(Boolean);
+      }
+
+      if (areaList.length > 0) {
+        profileQuery.specialization = { $in: areaList };
+      }
+    }
+
     // Fetch LawyerProfiles for these users
-    const lawyerProfiles = await lawyerProfileModel.find({ userId: { $in: lawyerIds } })
+    const lawyerProfiles = await lawyerProfileModel.find(profileQuery)
       .populate("lawyerProfileId"); // Populate UserInfo (city, image)
 
     // 3. Merge Data
@@ -69,20 +111,18 @@ export const getPublicLawyers = async (req, res) => {
       const profile = lawyerProfiles.find(p => p.userId.toString() === user._id.toString());
       const info = profile ? profile.lawyerProfileId : null;
 
-      if (!profile) return null; // Should not happen if data integrity is good
+      if (!profile) return null; // Filtered out by city or specialization
 
       return {
         _id: user._id,
         fullName: user.fullName,
-        email: user.email, // Maybe hide email if sensitive? Prompt says "Public Listing", usually email is hidden until contact. But user asked to "Show in card layout". I'll include it but frontend can choose.
-        // Actually, keep it safe.
+        email: user.email,
         city: info?.city,
         province: info?.province,
         profileImageUrl: info?.profileImageUrl,
         bio: profile.bio,
         specialization: profile.specialization,
         experience: profile.experience,
-        // education: profile.education // Optional, maybe needed for details modal
       };
     }).filter(Boolean);
 
