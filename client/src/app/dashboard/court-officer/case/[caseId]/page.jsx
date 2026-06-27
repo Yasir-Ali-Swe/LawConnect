@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Gavel, CalendarPlus, CheckCircle } from "lucide-react";
+import { ArrowLeft, Gavel, CalendarPlus, CheckCircle, FileText, Download, Eye, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { CaseOverviewTab } from "@/components/dashboard/cases/CaseOverviewTab";
@@ -40,6 +40,12 @@ import { casesApi } from "@/lib/api/cases";
 export default function OfficerCaseDetailPage() {
   const { caseId } = useParams();
   const queryClient = useQueryClient();
+
+  const [verdict, setVerdict] = useState("");
+  const [details, setDetails] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // -- Data Fetching --
   const {
@@ -64,22 +70,45 @@ export default function OfficerCaseDetailPage() {
     enabled: !!caseId,
   });
 
+  const { data: judgmentResult, isLoading: judgmentLoading } = useQuery({
+    queryKey: ["caseJudgment", caseId],
+    queryFn: () => casesApi.getJudgments(caseId),
+    enabled: !!caseId,
+  });
+
   const caseData = caseResult?.data;
   const hearings = hearingsResult?.data || [];
   const documents = documentsResult?.data || [];
+  const judgment = judgmentResult?.data;
+  const activeJudgment = Array.isArray(judgment) ? judgment[0] : judgment;
+
+  // Sync state once judgment data is loaded
+  React.useEffect(() => {
+    if (activeJudgment && !isInitialized) {
+      setVerdict(activeJudgment.verdict || "");
+      setDetails(activeJudgment.judgmentDetails || "");
+      setIsInitialized(true);
+    }
+  }, [activeJudgment, isInitialized]);
 
   // -- Mutations --
 
   const judgmentMutation = useMutation({
-    mutationFn: (data) => courtOfficerApi.makeJudgment(caseId, data),
+    mutationFn: (formData) => courtOfficerApi.makeJudgment(caseId, formData, setUploadProgress),
     onSuccess: () => {
-      toast.success("Judgment delivered. Case Decided.");
+      toast.success(activeJudgment ? "Judgment updated successfully." : "Judgment delivered. Case Decided.");
+      setSelectedFile(null);
+      setUploadProgress(0);
+      setIsInitialized(false);
+      queryClient.invalidateQueries(["caseJudgment", caseId]);
       queryClient.invalidateQueries(["activeCase", caseId]);
       queryClient.invalidateQueries(["officerCases"]);
       queryClient.invalidateQueries(["officerStats"]);
     },
-    onError: (err) =>
-      toast.error(err.response?.data?.message || "Failed to deliver judgment"),
+    onError: (err) => {
+      setUploadProgress(0);
+      toast.error(err.response?.data?.message || "Failed to save judgment");
+    },
   });
 
   const activateMutation = useMutation({
@@ -187,33 +216,38 @@ export default function OfficerCaseDetailPage() {
         <TabsContent value="judgment" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Final Judgment</CardTitle>
+              <CardTitle>{activeJudgment ? "Update Judgment" : "Final Judgment"}</CardTitle>
             </CardHeader>
             <CardContent>
-              {isReadOnly ? (
-                <div className="space-y-4">
-                  <div className="bg-muted p-4 rounded-md">
-                    <h4 className="font-semibold mb-2">Verdict</h4>
-                    <p>
-                      {caseData.status === "decided"
-                        ? "Case Decided"
-                        : caseData.status}
-                    </p>
-                    <p className="text-sm text-green-600 font-bold flex items-center gap-2 mt-2">
-                      <CheckCircle className="h-4 w-4" /> Judgment Delivered
-                    </p>
-                  </div>
-                </div>
+              {judgmentLoading ? (
+                <div className="py-4 text-sm text-muted-foreground">Loading judgment details...</div>
               ) : (
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    const fd = new FormData(e.target);
-                    if (confirm("Are you sure? This will close the case.")) {
-                      judgmentMutation.mutate({
-                        verdict: fd.get("verdict"),
-                        judgmentDetails: fd.get("details"),
-                      });
+                    if (!verdict.trim()) {
+                      toast.warning("Verdict summary is required.");
+                      return;
+                    }
+                    if (!details.trim()) {
+                      toast.warning("Judgment details are required.");
+                      return;
+                    }
+
+                    const isConfirm = confirm(
+                      activeJudgment 
+                        ? "Are you sure you want to update the judgment?" 
+                        : "Are you sure? This will deliver the judgment and close the case."
+                    );
+                    
+                    if (isConfirm) {
+                      const fd = new FormData();
+                      fd.append("verdict", verdict.trim());
+                      fd.append("judgmentDetails", details.trim());
+                      if (selectedFile) {
+                        fd.append("file", selectedFile);
+                      }
+                      judgmentMutation.mutate(fd);
                     }
                   }}
                   className="space-y-4"
@@ -222,6 +256,8 @@ export default function OfficerCaseDetailPage() {
                     <Label>Verdict Summary</Label>
                     <Input
                       name="verdict"
+                      value={verdict}
+                      onChange={(e) => setVerdict(e.target.value)}
                       placeholder="e.g. In favor of Plaintiff"
                       required
                     />
@@ -230,18 +266,139 @@ export default function OfficerCaseDetailPage() {
                     <Label>Detailed Judgment</Label>
                     <Textarea
                       name="details"
+                      value={details}
+                      onChange={(e) => setDetails(e.target.value)}
                       className="min-h-37.5"
                       placeholder="Full judgment text..."
                       required
                     />
                   </div>
+
+                  {/* Decision Document display (if uploaded previously) */}
+                  {activeJudgment?.documentOriginalName && (
+                    <div className="mt-4">
+                      <Label>Uploaded Decision Document</Label>
+                      <Card className="mt-1 bg-muted/40">
+                        <CardContent className="p-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0 space-y-1 flex-1">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 shrink-0 text-primary" />
+                              <span className="font-medium text-sm truncate" title={activeJudgment.documentOriginalName}>
+                                {activeJudgment.documentOriginalName}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground pl-6">
+                              Uploaded {format(new Date(activeJudgment.updatedAt), "PPP")}
+                              {activeJudgment.documentSize && ` · Size: ${(activeJudgment.documentSize / 1024 / 1024).toFixed(2)} MB`}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={activeJudgment.documentUrl} target="_blank" rel="noopener noreferrer">
+                                <Eye className="mr-1 h-4 w-4" /> View
+                              </a>
+                            </Button>
+                            <Button variant="ghost" size="sm" type="button" onClick={() => {
+                              const a = document.createElement("a");
+                              a.href = activeJudgment.documentUrl;
+                              a.download = activeJudgment.documentOriginalName || "decision";
+                              a.target = "_blank";
+                              a.rel = "noopener noreferrer";
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                            }}>
+                              <Download className="mr-1 h-4 w-4" /> Download
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Document Upload Control */}
+                  <div className="space-y-2">
+                    <Label htmlFor="decision-file">
+                      {activeJudgment?.documentOriginalName ? "Replace Decision Document (PDF, DOC, DOCX)" : "Upload Decision Document (PDF, DOC, DOCX)"}
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        id="decision-file"
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const allowedTypes = [
+                              "application/pdf",
+                              "application/msword",
+                              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            ];
+                            if (!allowedTypes.includes(file.type)) {
+                              toast.error("Invalid file type. Only PDF, DOC, and DOCX are allowed.");
+                              e.target.value = "";
+                              setSelectedFile(null);
+                              return;
+                            }
+                            if (file.size > 10 * 1024 * 1024) { // 10 MB
+                              toast.error("File size exceeds 10MB limit.");
+                              e.target.value = "";
+                              setSelectedFile(null);
+                              return;
+                            }
+                            setSelectedFile(file);
+                          }
+                        }}
+                      />
+                      {selectedFile && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          type="button"
+                          onClick={() => {
+                            setSelectedFile(null);
+                            const fileInput = document.getElementById("decision-file");
+                            if (fileInput) fileInput.value = "";
+                          }}
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Progress Bar */}
+                    {uploadProgress > 0 && (
+                      <div className="w-full mt-2">
+                        <div className="w-full bg-secondary rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-xs text-muted-foreground mt-1 block">
+                          Uploading: {uploadProgress}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                   <Button
                     type="submit"
-                    variant="destructive"
+                    variant={activeJudgment ? "default" : "destructive"}
                     disabled={judgmentMutation.isPending}
+                    className="w-full sm:w-auto"
                   >
-                    <Gavel className="mr-2 h-4 w-4" /> Deliver Judgment & Close
-                    Case
+                    {judgmentMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {uploadProgress > 0 ? "Uploading Document..." : "Saving..."}
+                      </>
+                    ) : (
+                      <>
+                        <Gavel className="mr-2 h-4 w-4" />
+                        {activeJudgment ? "Update Judgment" : "Deliver Judgment & Close Case"}
+                      </>
+                    )}
                   </Button>
                 </form>
               )}
