@@ -37,8 +37,16 @@ export const courtOfficerApi = {
     },
 
     // Judgment
-    makeJudgment: async (caseId, data) => {
-        const response = await api.post(`/court-officer/make-judgment/${caseId}`, data);
+    makeJudgment: async (caseId, formData, onProgress) => {
+        const response = await api.post(`/court-officer/make-judgment/${caseId}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            onUploadProgress: (progressEvent) => {
+                if (onProgress && progressEvent.total) {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    onProgress(percentCompleted);
+                }
+            }
+        });
         return response.data;
     },
 
