@@ -156,16 +156,16 @@ const DashboardSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
+      <SidebarSeparator className={"mx-0"} />
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem >
             <SidebarMenuButton
               tooltip="Logout"
               onClick={handleLogout}
-              className="text-red-500 hover:text-red-600 hover:bg-red-50"
+              className="text-red-700 hover:bg-transparent  hover:text-red-500 active:bg-transparent active:text-red-500 cursor-pointer"
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="h-4 w-4" />
               <span>Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -178,4 +178,3 @@ const DashboardSidebar = () => {
 export default DashboardSidebar;
 
 
-// rounded-full [&>svg]:size-5
