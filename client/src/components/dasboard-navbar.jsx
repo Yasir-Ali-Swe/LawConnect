@@ -26,7 +26,7 @@ const DasboardNavbar = () => {
   const { role, user } = useSelector((state) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  console.log(`profile image ${user?.profileImageUrl}`)
+
 
   // Sync profile details by querying auth user data.
   // This helps fetch updated details (like profileImageUrl) after bootstrap or profile change.
