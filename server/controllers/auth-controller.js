@@ -1,4 +1,5 @@
 import UserBaseModel from "../models/user-base-model.js";
+import UserProfileModel from "../models/user-info-model.js";
 import { generateJWT, getUserFromToken } from "../utils/make-jwt.js";
 import { sendVerificationEmail } from "../utils/verification-email.js";
 import { hashPassword, comparePassword } from "../utils/hash-password.js";
@@ -152,6 +153,7 @@ export const getMe = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Not authenticated");
   }
   const user = await getUserFromToken(authToken, "auth");
+  const profile = await UserProfileModel.findOne({ userId: user._id });
   res.status(200).json({
     success: true,
     user: {
@@ -160,6 +162,7 @@ export const getMe = asyncHandler(async (req, res) => {
       fullName: user.fullName,
       role: user.role,
       isProfileComplete: user.isProfileComplete,
+      profileImageUrl: profile?.profileImageUrl || null,
     },
   });
 });
