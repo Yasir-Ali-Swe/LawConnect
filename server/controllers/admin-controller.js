@@ -3,6 +3,8 @@ import userBase from "../models/user-base-model.js";
 import courtModel from "../models/court-model.js";
 import clerkProfileModel from "../models/clerk-profile-model.js";
 import courtOfficerProfileModel from "../models/court-officer-profile-model.js";
+import lawyerProfileModel from "../models/lawyer-profile-model.js";
+import clientProfileModel from "../models/client-profile-model.js";
 import { replaceProfileImage } from "../utils/profile-image-service.js";
 import { generateJWT } from "../utils/make-jwt.js";
 import { FRONTEND_URL } from "../config/env.js";
@@ -367,6 +369,7 @@ export const adminCreateInternalUser = async (req, res) => {
       isVerified: true,
       isProfileComplete: role === "court_officer" ? false : true,
       role,
+      status: "active",
     });
     await clerk.save();
     const clerkProfile = new userInfo({
@@ -420,7 +423,7 @@ export const adminCreateInternalUser = async (req, res) => {
 
 export const adminGetAllInternalUsers = async (req, res) => {
   try {
-    const { role, search, location } = req.query;
+    const { role, search, email, status, location } = req.query;
     const userId = req.userId;
     // Build query
     const query = {
@@ -431,6 +434,23 @@ export const adminGetAllInternalUsers = async (req, res) => {
     }
     if (search) {
       query.fullName = { $regex: search, $options: "i" };
+    }
+    if (email) {
+      query.email = { $regex: email, $options: "i" };
+    }
+    if (status && status !== "all") {
+      const lowerStatus = status.toLowerCase();
+      if (lowerStatus === "active") {
+        query.$or = [
+          { status: "active" },
+          { status: { $exists: false }, role: { $ne: "lawyer" } }
+        ];
+      } else if (lowerStatus === "inactive") {
+        query.$or = [
+          { status: "inactive" },
+          { status: { $exists: false }, role: "lawyer" }
+        ];
+      }
     }
 
     const internalUsers = await userBase.find(query);
@@ -822,6 +842,155 @@ export const getDashboardStats = async (req, res) => {
       success: false,
       message: "Error fetching dashboard stats",
       error: error.message,
+    });
+  }
+};
+
+export const adminGetUserProfileById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Find the user by ID (excluding password)
+    const user = await userBase.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Find their base profile details
+    const baseProfile = await userInfo.findOne({ userId });
+
+    let roleProfile = null;
+    
+    if (user.role === "lawyer") {
+      roleProfile = await lawyerProfileModel.findOne({ userId });
+    } else if (user.role === "clerk") {
+      roleProfile = await clerkProfileModel.findOne({ userId }).populate("courtId");
+    } else if (user.role === "court_officer") {
+      roleProfile = await courtOfficerProfileModel.findOne({ userId }).populate("courtId");
+    } else if (user.role === "client") {
+      roleProfile = await clientProfileModel.findOne({ userId });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User profile fetched successfully",
+      data: {
+        user,
+        baseProfile,
+        roleProfile
+      }
+    });
+  } catch (error) {
+    console.error("Error in adminGetUserProfileById:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching user profile",
+      error: error.message
+    });
+  }
+};
+
+export const adminToggleUserStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Prevent self-toggle
+    if (req.userId.toString() === userId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot toggle your own account status"
+      });
+    }
+
+    const user = await userBase.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Toggle status: active <-> inactive
+    const currentStatus = user.status || (user.role === "lawyer" ? "inactive" : "active");
+    const nextStatus = currentStatus === "active" ? "inactive" : "active";
+    
+    user.status = nextStatus;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `User status updated to ${nextStatus} successfully`,
+      data: {
+        userId: user._id,
+        status: user.status
+      }
+    });
+  } catch (error) {
+    console.error("Error in adminToggleUserStatus:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error toggling user status",
+      error: error.message
+    });
+  }
+};
+
+export const adminApproveLawyerAccount = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Prevent self-approval
+    if (req.userId.toString() === userId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot approve your own account"
+      });
+    }
+
+    const user = await userBase.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Check if lawyer
+    if (user.role !== "lawyer") {
+      return res.status(400).json({
+        success: false,
+        message: "Only lawyers can be approved"
+      });
+    }
+
+    // Check if already active
+    if (user.status === "active") {
+      return res.status(200).json({
+        success: true,
+        message: "Lawyer account is already active"
+      });
+    }
+
+    user.status = "active";
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Lawyer account approved and activated successfully",
+      data: {
+        userId: user._id,
+        status: user.status
+      }
+    });
+  } catch (error) {
+    console.error("Error in adminApproveLawyerAccount:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error approving lawyer account",
+      error: error.message
     });
   }
 };
