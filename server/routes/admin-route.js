@@ -1,4 +1,4 @@
-import { createProfile, adminUpdateHisProfile, adminUpdateAccount, adminGetHisProfile, adminCreateInternalUser, adminCreateCourt, getAllCourts, getCourtById, adminGetAllInternalUsers, adminGetInternalUserById, adminAssigneClerkToCourt, getClerkProfile, adminAssigneCourtOfficerToCourt, getCourtOfficerProfile, adminGetAllCourtOfficers, getUnassignedClerks, getUnassignedCourtOfficers, getDashboardStats } from "../controllers/admin-controller.js";
+import { createProfile, adminUpdateHisProfile, adminUpdateAccount, adminGetHisProfile, adminCreateInternalUser, adminCreateCourt, getAllCourts, getCourtById, adminGetAllInternalUsers, adminGetInternalUserById, adminAssigneClerkToCourt, getClerkProfile, adminAssigneCourtOfficerToCourt, getCourtOfficerProfile, adminGetAllCourtOfficers, getUnassignedClerks, getUnassignedCourtOfficers, getDashboardStats, adminGetUserProfileById, adminToggleUserStatus, adminApproveLawyerAccount } from "../controllers/admin-controller.js";
 import { adminMiddleware } from "../middlewares/admin-middleware.js";
 import { uploadProfileImage } from "../middlewares/upload-middleware.js";
 import express from "express";
@@ -36,6 +36,11 @@ router.get("/get-clerk-profile/:userId", adminMiddleware, getClerkProfile)
 router.post("/assigne-court-officer", adminMiddleware, adminAssigneCourtOfficerToCourt)
 router.get("/get-court-officer-profile/:userId", adminMiddleware, getCourtOfficerProfile)
 router.get("/get-all-court-officers", adminMiddleware, adminGetAllCourtOfficers)
+
+// User Account Management & Approval Routes
+router.get("/get-user-profile/:userId", adminMiddleware, adminGetUserProfileById);
+router.put("/users/:userId/toggle-status", adminMiddleware, adminToggleUserStatus);
+router.put("/users/:userId/approve", adminMiddleware, adminApproveLawyerAccount);
 
 // Assignment Helpers
 router.get("/get-unassigned-clerks", adminMiddleware, getUnassignedClerks);
