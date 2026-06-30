@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -257,29 +258,45 @@ function CreateUserDialog({ open, onOpenChange }) {
 }
 
 export default function AdminUsersPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [emailTerm, setEmailTerm] = useState("");
+  const [debouncedEmailTerm, setDebouncedEmailTerm] = useState("");
   const [locationTerm, setLocationTerm] = useState("");
   const [debouncedLocationTerm, setDebouncedLocationTerm] = useState("");
   const [role, setRole] = useState("all");
+  const [status, setStatus] = useState("all");
+
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  useEffect(() => {
+    const handleClickOutside = () => setActiveDropdown(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm.trim());
+      setDebouncedEmailTerm(emailTerm.trim());
       setDebouncedLocationTerm(locationTerm.trim());
     }, 350);
     return () => clearTimeout(timer);
-  }, [searchTerm, locationTerm]);
+  }, [searchTerm, emailTerm, locationTerm]);
 
   const filters = useMemo(
     () => ({
       search: debouncedSearchTerm,
+      email: debouncedEmailTerm,
       location: debouncedLocationTerm,
       role,
+      status,
     }),
-    [debouncedSearchTerm, debouncedLocationTerm, role],
+    [debouncedSearchTerm, debouncedEmailTerm, debouncedLocationTerm, role, status],
   );
 
   const { data: result, isLoading } = useQuery({
@@ -287,13 +304,26 @@ export default function AdminUsersPage() {
     queryFn: () => adminApi.getAllInternalUsers(filters),
   });
 
+  const toggleStatusMutation = useMutation({
+    mutationFn: adminApi.toggleUserStatus,
+    onSuccess: (data) => {
+      toast.success(data.message || "User status updated successfully");
+      queryClient.invalidateQueries(["internalUsers"]);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Failed to toggle user status");
+    },
+  });
+
   const users = result?.data || [];
-  const hasActiveFilters = searchTerm || locationTerm || role !== "all";
+  const hasActiveFilters = searchTerm || emailTerm || locationTerm || role !== "all" || status !== "all";
 
   const resetFilters = () => {
     setSearchTerm("");
+    setEmailTerm("");
     setLocationTerm("");
     setRole("all");
+    setStatus("all");
   };
 
   return (
@@ -313,8 +343,8 @@ export default function AdminUsersPage() {
 
       <CreateUserDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
 
-      <div className="flex flex-col gap-4 md:flex-row">
-        <div className="relative flex-1 md:max-w-62.5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5 items-end">
+        <div className="relative w-full">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by name..."
@@ -324,7 +354,17 @@ export default function AdminUsersPage() {
           />
         </div>
 
-        <div className="relative flex-1 md:max-w-62.5">
+        <div className="relative w-full">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by email..."
+            className="pl-8"
+            value={emailTerm}
+            onChange={(e) => setEmailTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="relative w-full">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by location..."
@@ -335,7 +375,7 @@ export default function AdminUsersPage() {
         </div>
 
         <Select value={role} onValueChange={setRole}>
-          <SelectTrigger className="w-full md:w-50">
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Role" />
           </SelectTrigger>
           <SelectContent>
@@ -348,37 +388,53 @@ export default function AdminUsersPage() {
           </SelectContent>
         </Select>
 
-        <Button
-          variant="outline"
-          onClick={resetFilters}
-          disabled={!hasActiveFilters}
-        >
-          Reset
-        </Button>
+        <div className="flex gap-2 w-full">
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            onClick={resetFilters}
+            disabled={!hasActiveFilters}
+            className="shrink-0"
+          >
+            Reset
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-md">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>No.</TableHead>
+              <TableHead className="w-12">No.</TableHead>
               <TableHead>Full Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Location</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right pr-6 w-24">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                <TableCell colSpan={7} className="h-24 text-center">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={7}
                   className="h-24 text-center text-muted-foreground"
                 >
                   {hasActiveFilters
@@ -387,34 +443,86 @@ export default function AdminUsersPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user, i) => (
-                <TableRow key={user._id}>
-                  <TableCell>{i + 1}</TableCell>
-                  <TableCell className="font-medium max-w-50">
-                    <div className="truncate" title={user.fullName}>
-                      {user.fullName}
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-50">
-                    <div className="truncate" title={user.email}>
-                      {user.email}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {user.role === "court_officer"
-                        ? "Officer"
-                        : user.role.charAt(0).toUpperCase() +
-                          user.role.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="max-w-37.5">
-                    <div className="truncate" title={user.profile?.city}>
-                      {user.profile?.city || "N/A"}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              users.map((user, i) => {
+                const userStatus = user.status || (user.role === "lawyer" ? "inactive" : "active");
+                return (
+                  <TableRow key={user._id}>
+                    <TableCell>{i + 1}</TableCell>
+                    <TableCell className="font-medium max-w-50">
+                      <div className="truncate" title={user.fullName}>
+                        {user.fullName}
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-50">
+                      <div className="truncate" title={user.email}>
+                        {user.email}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {user.role === "court_officer"
+                          ? "Officer"
+                          : user.role.charAt(0).toUpperCase() +
+                            user.role.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-37.5">
+                      <div className="truncate" title={user.profile?.city}>
+                        {user.profile?.city || "N/A"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {userStatus === "active" ? (
+                        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 font-medium">
+                          Active
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-900/50 hover:bg-amber-100 dark:hover:bg-amber-950/40 font-medium">
+                          Inactive
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <div className="relative inline-block text-left">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveDropdown(activeDropdown === user._id ? null : user._id);
+                          }}
+                        >
+                          <span className="sr-only">Open actions</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                        {activeDropdown === user._id && (
+                          <div className="absolute right-0 mt-1 w-32 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md z-50 animate-in fade-in duration-100 slide-in-from-top-1">
+                            <button
+                              onClick={() => {
+                                setActiveDropdown(null);
+                                router.push(`/dashboard/admin/users/${user._id}`);
+                              }}
+                              className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                            >
+                              View Profile
+                            </button>
+                            <button
+                              onClick={() => {
+                                setActiveDropdown(null);
+                                toggleStatusMutation.mutate(user._id);
+                              }}
+                              className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                            >
+                              Toggle Status
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
