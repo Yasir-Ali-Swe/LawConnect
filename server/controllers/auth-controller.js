@@ -57,6 +57,7 @@ export const registeration = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
     role,
+    status: role === "lawyer" ? "inactive" : "active",
   });
   await newUser.save();
   const token = generateJWT(
