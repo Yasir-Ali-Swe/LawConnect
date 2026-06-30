@@ -177,4 +177,16 @@ export const adminApi = {
     const response = await api.get("/admin/get-dashboard-stats");
     return response.data;
   },
+  getUserProfile: async (userId) => {
+    const response = await api.get(`/admin/get-user-profile/${userId}`);
+    return response.data;
+  },
+  toggleUserStatus: async (userId) => {
+    const response = await api.put(`/admin/users/${userId}/toggle-status`);
+    return response.data;
+  },
+  approveLawyerAccount: async (userId) => {
+    const response = await api.put(`/admin/users/${userId}/approve`);
+    return response.data;
+  },
 };
