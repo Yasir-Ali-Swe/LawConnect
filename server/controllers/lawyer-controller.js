@@ -54,7 +54,8 @@ export const getPublicLawyers = async (req, res) => {
     // 1. Build userBaseModel query
     const userQuery = {
       role: "lawyer",
-      isProfileComplete: true
+      isProfileComplete: true,
+      status: "active"
     };
 
     if (name) {
