@@ -16,7 +16,7 @@ const userBaseSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: function() {
+      default: function () {
         return this.role === "lawyer" ? "inactive" : "active";
       },
     },
