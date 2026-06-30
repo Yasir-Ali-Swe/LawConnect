@@ -849,7 +849,7 @@ export const getDashboardStats = async (req, res) => {
 export const adminGetUserProfileById = async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
     // Find the user by ID (excluding password)
     const user = await userBase.findById(userId).select("-password");
     if (!user) {
@@ -863,7 +863,7 @@ export const adminGetUserProfileById = async (req, res) => {
     const baseProfile = await userInfo.findOne({ userId });
 
     let roleProfile = null;
-    
+
     if (user.role === "lawyer") {
       roleProfile = await lawyerProfileModel.findOne({ userId });
     } else if (user.role === "clerk") {
@@ -896,7 +896,7 @@ export const adminGetUserProfileById = async (req, res) => {
 export const adminToggleUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
     // Prevent self-toggle
     if (req.userId.toString() === userId.toString()) {
       return res.status(400).json({
@@ -916,7 +916,7 @@ export const adminToggleUserStatus = async (req, res) => {
     // Toggle status: active <-> inactive
     const currentStatus = user.status || (user.role === "lawyer" ? "inactive" : "active");
     const nextStatus = currentStatus === "active" ? "inactive" : "active";
-    
+
     user.status = nextStatus;
     await user.save();
 
