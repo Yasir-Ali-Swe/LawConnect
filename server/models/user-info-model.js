@@ -29,6 +29,19 @@ const userProfileSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other", null],
+      default: null,
+    },
+    phoneNumber: {
+      type: String,
+      default: null,
+    },
+    address: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true },
 );
