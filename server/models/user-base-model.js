@@ -13,6 +13,13 @@ const userBaseSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     isProfileComplete: { type: Boolean, default: false },
     tokenVersion: { type: Number, default: 0 },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: function() {
+        return this.role === "lawyer" ? "inactive" : "active";
+      },
+    },
   },
   { timestamps: true },
 );
