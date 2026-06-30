@@ -274,7 +274,12 @@ export default function AdminUsersPage() {
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   useEffect(() => {
-    const handleClickOutside = () => setActiveDropdown(null);
+    const handleClickOutside = (e) => {
+      if (e.target.closest(".actions-dropdown-container")) {
+        return;
+      }
+      setActiveDropdown(null);
+    };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
@@ -463,7 +468,7 @@ export default function AdminUsersPage() {
                         {user.role === "court_officer"
                           ? "Officer"
                           : user.role.charAt(0).toUpperCase() +
-                            user.role.slice(1)}
+                          user.role.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-37.5">
@@ -483,13 +488,12 @@ export default function AdminUsersPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-right pr-6">
-                      <div className="relative inline-block text-left">
+                      <div className="relative inline-block text-left actions-dropdown-container">
                         <Button
                           variant="ghost"
                           size="sm"
                           className="h-8 w-8 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
+                          onClick={() => {
                             setActiveDropdown(activeDropdown === user._id ? null : user._id);
                           }}
                         >
@@ -503,7 +507,7 @@ export default function AdminUsersPage() {
                                 setActiveDropdown(null);
                                 router.push(`/dashboard/admin/users/${user._id}`);
                               }}
-                              className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                              className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors text-left"
                             >
                               View Profile
                             </button>
@@ -512,7 +516,7 @@ export default function AdminUsersPage() {
                                 setActiveDropdown(null);
                                 toggleStatusMutation.mutate(user._id);
                               }}
-                              className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                              className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors text-left"
                             >
                               Toggle Status
                             </button>
